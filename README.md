@@ -15,3 +15,6 @@ Designed for windows computers. If other OS used, update COM port assignment
 
 Full list of possible commands available at https://gist.github.com/ns96/ef95fd06573a871adfa1c4bed21eef43
 I've just put the useful ones here
+
+The idea here is to use this as the basis of further code. Each of the functions can be copied into the code 
+to allow for the development of a programmed protocol.
