@@ -11,3 +11,4 @@ Python libraries required:
 1. PySerial
 2. Time
 
+Designed for windows computers. If other OS used, update COM port assignment
