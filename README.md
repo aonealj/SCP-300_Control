@@ -12,3 +12,6 @@ Python libraries required:
 2. Time
 
 Designed for windows computers. If other OS used, update COM port assignment
+
+Full list of possible commands available at https://gist.github.com/ns96/ef95fd06573a871adfa1c4bed21eef43
+I've just put the useful ones here
