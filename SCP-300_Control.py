@@ -4,22 +4,21 @@ import time
 
 # establish
 print('Establishing Serial Connection')
-sc = serial.Serial()
-sc.port = 'COM1'  # update port based on what shows up in device manager
-sc.baudrate = 19200  # default baud rate for SCP-300
-sc.timeout = 5  # sec
-sc.write_timeout = 5  # sec
-sc.open()  # important as port is not opened by default
+spin_coater = serial.Serial()
+spin_coater.port = 'COM1'  # update port based on what shows up in device manager
+spin_coater.baudrate = 19200  # default baud rate for SCP-300
+spin_coater.timeout = 5  # sec
+spin_coater.write_timeout = 5  # sec
+spin_coater.open()  # important as port is not opened by default
 
-if sc.isOpen():
+if spin_coater.isOpen():
     print('Spin Coater Connection Open')
 else:
     print('Spin Coater Connection Failed')
 
 
-# functions to operate the equipment
+# functions to operate the equipment:
 
-# function to create cmd signal with byes and end chars from string input
 def cmd_sc(input_char):
     return bytes(str(input_char) + '\r\n', 'ascii')
 
@@ -31,19 +30,19 @@ com_delay = 0.25  # seconds
 def motor_startup(PWM=110, slope=950, intercept=550):
     # default values provided from in SCP documentation
     # set motor Pulse Width Modulation (PWM)
-    sc.write(cmd_sc('SetStartPWM,' + str(PWM)))
+    spin_coater.write(cmd_sc('SetStartPWM,' + str(PWM)))
     time.sleep(com_delay)  # seconds. Pause program to ensure clean coms. Might be able to be shorter.
 
     # set motor profile slope
-    sc.write(cmd_sc('SetSlope,' + str(slope)))
+    spin_coater.write(cmd_sc('SetSlope,' + str(slope)))
     time.sleep(com_delay)
 
     # set motor profile intercept
-    sc.write(cmd_sc('SetIntercept,' + str(intercept)))
+    spin_coater.write(cmd_sc('SetIntercept,' + str(intercept)))
     time.sleep(com_delay)
 
     # turn on the motor
-    sc.write(cmd_sc('BLDCon'))
+    spin_coater.write(cmd_sc('BLDCon'))
     time.sleep(com_delay)
 
     print('Spin Coater Motor Startup Complete')
@@ -51,7 +50,7 @@ def motor_startup(PWM=110, slope=950, intercept=550):
 
 # function to set the motor speed
 def set_speed(rpm):
-    sc.write(cmd_sc('SetRPM,' + str(rpm)))
+    spin_coater.write(cmd_sc('SetRPM,' + str(rpm)))
 
 
 # motor speed will remain constant until changed
@@ -59,8 +58,8 @@ def set_speed(rpm):
 
 # function to query the motor for it's speed
 def get_speed():
-    sc.write(cmd_sc('GetRPM'))
-    current_speed = sc.read_until(bytes('\n\r', 'ascii'))
+    spin_coater.write(cmd_sc('GetRPM'))
+    current_speed = spin_coater.read_until(bytes('\n\r', 'ascii'))
     print(current_speed.decode())
 
 
@@ -68,14 +67,14 @@ def get_speed():
 def motor_shutoff():
     set_speed(0)
     time.sleep(5)
-    sc.write(cmd_sc('BLDCoff'))
+    spin_coater.write(cmd_sc('BLDCoff'))
 
 
 # Setting slope for slower spin
 # unsure about this, but seems to match documentation
 def set_slope(slope):  # rpm/s, suspected
     slope_times_100 = slope * 100
-    sc.write(cmd_sc('SetSlope ' + str(slope_times_100)))
+    spin_coater.write(cmd_sc('SetSlope ' + str(slope_times_100)))
     print('Slope is now ' + str(slope))
 
 
@@ -87,7 +86,9 @@ def check_speed(duration, time_between):  # duration in seconds
     while (end - start) < duration:
         get_speed()
         time.sleep(time_between)
-        # add a failsafe catch for preventing endless loops
+        end = time.time()
+
+        # failsafe to prevent endless loops
         i = 0
         i += 1
         if i > 1000:
